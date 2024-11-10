@@ -82,7 +82,11 @@ export const handleSignIn = async (req, res) => {
 
     return res
       .status(200)
-      .cookie("access_token", token, { sameSite: "None", secure: true })
+      .cookie("access_token", token, {
+        sameSite: "None",
+        secure: true,
+        httpOnly: true,
+      })
       .json({
         success: true,
         message: "Signed in successfully",
@@ -93,4 +97,17 @@ export const handleSignIn = async (req, res) => {
       message: "Server error " + error,
     });
   }
+};
+
+export const handleSignOut = async (req, res) => {
+  res.status(200).clearCookie("access_token").json({
+    success: true,
+    message: "Sign out successfully",
+  });
+};
+
+export const handleGetCurrentUser = async (req, res) => {
+  const user = req.user;
+
+  res.status(200).send(user);
 };

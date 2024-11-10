@@ -22,3 +22,15 @@ export const createUser = async (firsname, lastname, email, password) => {
     [firsname, lastname, email, password]
   );
 };
+
+export const getCurrentUser = async (user_id) => {
+  const [result] = await pool.query(
+    `
+    SELECT firstname, lastname
+    FROM users
+    WHERE user_id = ?
+    `[user_id]
+  );
+
+  return result[0];
+};
