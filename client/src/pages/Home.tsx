@@ -1,15 +1,8 @@
 import { ArrowRight } from "lucide-react";
 import Navbar from "../components/Navbar";
-import { Link, Navigate } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
+import { Link } from "react-router-dom";
 
 export default function Home() {
-  const { isAuthenticated } = useAuth();
-
-  if (isAuthenticated()) {
-    return <Navigate to="/tasks" replace />;
-  }
-
   return (
     <>
       <Navbar />

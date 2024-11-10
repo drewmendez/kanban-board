@@ -3,19 +3,23 @@ import Logo from "./Logo";
 import { useAuth } from "../context/AuthContext";
 
 export default function Navbar() {
-  const { isAuthenticated, signOut, currentUser } = useAuth();
+  const { signOut, currentUser, getCurrentUser } = useAuth();
   const navigate = useNavigate();
 
   const handleSignOut = () => {
-    signOut();
-    navigate("/", { replace: true });
+    signOut(undefined, {
+      onSuccess: () => {
+        getCurrentUser();
+        navigate("/", { replace: true });
+      },
+    });
   };
 
   return (
     <header className="fixed top-0 w-full bg-bgWhite py-6 shadow-lg">
       <nav className="container flex items-center justify-between">
         <Logo />
-        {isAuthenticated() ? (
+        {currentUser?.user ? (
           <div className="flex items-center gap-6">
             <p className="text-slate-500">
               Signed in as:{" "}

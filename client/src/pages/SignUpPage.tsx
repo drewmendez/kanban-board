@@ -18,7 +18,7 @@ export default function SignUpPage() {
     resolver: zodResolver(SignUpFormSchema),
   });
 
-  const { signUp, isAuthenticated } = useAuth();
+  const { signUp, currentUser } = useAuth();
   const navigate = useNavigate();
 
   const onSubmit = (data: SignUpForm) => {
@@ -35,7 +35,7 @@ export default function SignUpPage() {
     });
   };
 
-  if (isAuthenticated()) {
+  if (currentUser?.user) {
     return <Navigate to="/tasks" replace />;
   }
 

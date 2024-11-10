@@ -3,9 +3,9 @@ import { useAuth } from "../context/AuthContext";
 import Navbar from "../components/Navbar";
 
 export default function ProtectedRoute() {
-  const { isAuthenticated } = useAuth();
+  const { currentUser } = useAuth();
 
-  if (!isAuthenticated()) {
+  if (!currentUser?.user) {
     return <Navigate to="/sign-in" replace />;
   }
 

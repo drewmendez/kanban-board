@@ -1,10 +1,14 @@
 import { createContext, ReactNode, useContext } from "react";
 import { SignInForm, SignUpForm } from "../types/types";
-import { UseMutateFunction } from "@tanstack/react-query";
+import { QueryObserverResult, UseMutateFunction } from "@tanstack/react-query";
 import { AxiosResponse } from "axios";
-import Cookies from "js-cookie";
-import { jwtDecode } from "jwt-decode";
-import { useSignIn, useSignUp } from "../services/authServices";
+
+import {
+  useGetCurrentUser,
+  useSignIn,
+  useSignOut,
+  useSignUp,
+} from "../services/authServices";
 
 interface DecodedToken {
   user_id: number;
@@ -24,9 +28,9 @@ interface Auth {
     SignInForm,
     unknown
   >;
-  signOut: () => void;
-  isAuthenticated: () => boolean;
-  currentUser: DecodedToken | null;
+  signOut: UseMutateFunction<any, Error, void, unknown>;
+  currentUser: DecodedToken | undefined;
+  getCurrentUser: () => Promise<QueryObserverResult<any, Error>>;
 }
 
 export const AuthContext = createContext<Auth | null>(null);
@@ -38,21 +42,21 @@ export default function AuthContextProvider({
 }) {
   const { mutate: signUp } = useSignUp();
   const { mutate: signIn } = useSignIn();
+  const { mutate: signOut } = useSignOut();
+  const { data: currentUser, refetch: getCurrentUser } = useGetCurrentUser();
 
-  const signOut = () => {
-    Cookies.remove("access_token");
-  };
-
-  const isAuthenticated = () => {
-    return !!Cookies.get("access_token");
-  };
-
-  const token = Cookies.get("access_token");
-  const currentUser = token ? jwtDecode<DecodedToken>(token) : null;
+  console.log(currentUser);
 
   return (
     <AuthContext.Provider
-      value={{ signUp, signIn, signOut, isAuthenticated, currentUser }}
+      value={{
+        signUp,
+        signIn,
+        signOut,
+
+        currentUser,
+        getCurrentUser,
+      }}
     >
       {children}
     </AuthContext.Provider>

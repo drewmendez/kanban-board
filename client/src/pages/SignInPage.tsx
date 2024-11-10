@@ -17,7 +17,7 @@ export default function SignInPage() {
     resolver: zodResolver(SignInFormSchema),
   });
 
-  const { signIn, isAuthenticated } = useAuth();
+  const { signIn, currentUser, getCurrentUser } = useAuth();
   const navigate = useNavigate();
 
   const onSubmit = (data: SignInForm) => {
@@ -37,11 +37,14 @@ export default function SignInPage() {
           }
         }
       },
-      onSuccess: () => navigate("/tasks", { replace: true }),
+      onSuccess: () => {
+        getCurrentUser();
+        navigate("/tasks", { replace: true });
+      },
     });
   };
 
-  if (isAuthenticated()) {
+  if (currentUser?.user) {
     return <Navigate to="/tasks" replace />;
   }
 
