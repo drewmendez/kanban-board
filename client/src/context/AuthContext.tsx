@@ -35,8 +35,6 @@ export default function AuthContextProvider({
   const { mutate: signOut } = useSignOut();
   const { data: currentUser, refetch: getCurrentUser } = useGetCurrentUser();
 
-  console.log(currentUser);
-
   return (
     <AuthContext.Provider
       value={{
