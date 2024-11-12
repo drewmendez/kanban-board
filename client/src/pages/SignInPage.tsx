@@ -5,7 +5,6 @@ import { useForm } from "react-hook-form";
 import { SignInForm, SignInFormSchema } from "../types/types";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useAuth } from "../context/AuthContext";
-import axios, { AxiosError } from "axios";
 
 export default function SignInPage() {
   const {
@@ -22,19 +21,17 @@ export default function SignInPage() {
 
   const onSubmit = (data: SignInForm) => {
     signIn(data, {
-      onError: (error: Error | AxiosError) => {
-        if (axios.isAxiosError(error)) {
-          if (error.response?.data.error === "email") {
-            setError("email", {
-              type: "server",
-              message: error.response?.data.message,
-            });
-          } else {
-            setError("password", {
-              type: "server",
-              message: error.response?.data.message,
-            });
-          }
+      onError: (error) => {
+        if (error.response?.data.error === "email") {
+          setError("email", {
+            type: "server",
+            message: error.response?.data.message,
+          });
+        } else {
+          setError("password", {
+            type: "server",
+            message: error.response?.data.message,
+          });
         }
       },
       onSuccess: () => {
@@ -44,7 +41,7 @@ export default function SignInPage() {
     });
   };
 
-  if (currentUser?.user) {
+  if (currentUser) {
     return <Navigate to="/tasks" replace />;
   }
 

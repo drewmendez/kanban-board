@@ -35,3 +35,14 @@ export interface Task {
 export type TaskPost = TaskForm & {
   user_id: number;
 };
+
+export interface ApiResponse {
+  success: boolean;
+  error?: string;
+  message: string;
+}
+
+export type CurrentUser = {
+  user_id: number;
+  user: string;
+};

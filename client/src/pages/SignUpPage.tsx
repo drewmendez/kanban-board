@@ -6,7 +6,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { SignUpForm, SignUpFormSchema } from "../types/types";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
-import axios, { AxiosError } from "axios";
 
 export default function SignUpPage() {
   const {
@@ -23,19 +22,17 @@ export default function SignUpPage() {
 
   const onSubmit = (data: SignUpForm) => {
     signUp(data, {
-      onError: (error: Error | AxiosError) => {
-        if (axios.isAxiosError(error)) {
-          setError("email", {
-            type: "server",
-            message: error.response?.data.message,
-          });
-        }
+      onError: (error) => {
+        setError("email", {
+          type: "server",
+          message: error.response?.data.message,
+        });
       },
       onSuccess: () => navigate("/sign-in", { replace: true }),
     });
   };
 
-  if (currentUser?.user) {
+  if (currentUser) {
     return <Navigate to="/tasks" replace />;
   }
 

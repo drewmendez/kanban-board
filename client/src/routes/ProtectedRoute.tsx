@@ -5,7 +5,7 @@ import Navbar from "../components/Navbar";
 export default function ProtectedRoute() {
   const { currentUser } = useAuth();
 
-  if (!currentUser?.user) {
+  if (!currentUser) {
     return <Navigate to="/sign-in" replace />;
   }
 

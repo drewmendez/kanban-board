@@ -3,31 +3,31 @@ import { apiClient } from "./apiClient";
 import { Task, TaskForm, TaskPost } from "../types/types";
 
 export const useGetAllTask = () => {
-  return useQuery({
+  return useQuery<Task[]>({
     queryKey: ["tasks"],
     queryFn: async () => {
       const response = await apiClient.get("/tasks/all");
-      return response.data as Task[];
+      return response.data;
     },
   });
 };
 
 export const useGetTaskById = (task_id: number) => {
-  return useQuery({
+  return useQuery<Task>({
     queryKey: ["task", task_id],
     queryFn: async () => {
       const { data } = await apiClient.get(`/tasks/${task_id}`);
-      return data as Task;
+      return data;
     },
   });
 };
 
 export const useGetTasksByStatus = (status: string) => {
-  return useQuery({
+  return useQuery<Task[]>({
     queryKey: ["tasks", status],
     queryFn: async () => {
       const response = await apiClient.get(`/tasks?status=${status}`);
-      return response.data as Task[];
+      return response.data;
     },
   });
 };

@@ -1,7 +1,12 @@
 import { createContext, ReactNode, useContext } from "react";
-import { SignInForm, SignUpForm } from "../types/types";
+import {
+  ApiResponse,
+  CurrentUser,
+  SignInForm,
+  SignUpForm,
+} from "../types/types";
 import { QueryObserverResult, UseMutateFunction } from "@tanstack/react-query";
-import { AxiosResponse } from "axios";
+import { AxiosError } from "axios";
 
 import {
   useGetCurrentUser,
@@ -10,27 +15,12 @@ import {
   useSignUp,
 } from "../services/authServices";
 
-interface DecodedToken {
-  user_id: number;
-  user: string;
-}
-
 interface Auth {
-  signUp: UseMutateFunction<
-    AxiosResponse<any, any>,
-    Error,
-    SignUpForm,
-    unknown
-  >;
-  signIn: UseMutateFunction<
-    AxiosResponse<any, any>,
-    Error,
-    SignInForm,
-    unknown
-  >;
-  signOut: UseMutateFunction<any, Error, void, unknown>;
-  currentUser: DecodedToken | undefined;
-  getCurrentUser: () => Promise<QueryObserverResult<any, Error>>;
+  signUp: UseMutateFunction<ApiResponse, AxiosError<ApiResponse>, SignUpForm>;
+  signIn: UseMutateFunction<ApiResponse, AxiosError<ApiResponse>, SignInForm>;
+  signOut: UseMutateFunction<ApiResponse, AxiosError<ApiResponse>>;
+  currentUser: CurrentUser | undefined | null;
+  getCurrentUser: () => Promise<QueryObserverResult<CurrentUser | null, Error>>;
 }
 
 export const AuthContext = createContext<Auth | null>(null);
@@ -53,7 +43,6 @@ export default function AuthContextProvider({
         signUp,
         signIn,
         signOut,
-
         currentUser,
         getCurrentUser,
       }}
