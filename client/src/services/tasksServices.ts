@@ -1,4 +1,4 @@
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiClient } from "./apiClient";
 import { Task, TaskForm, TaskPost } from "../types/types";
 
@@ -41,10 +41,13 @@ export const useAddTask = () => {
 };
 
 export const useDeleteTask = () => {
+  const queryClient = useQueryClient();
+
   return useMutation({
     mutationFn: async (task_id: number) => {
       return await apiClient.delete(`/tasks/${task_id}`);
     },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["tasks"] }),
   });
 };
 
