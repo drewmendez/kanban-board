@@ -72,9 +72,9 @@ export const handleGetTasksByStatus = async (req, res) => {
 };
 
 export const handleCreateTask = async (req, res) => {
-  const { user_id, title, content, status } = req.body;
+  const { user_id, title, content, status_id } = req.body;
 
-  if (!user_id || !title || !content || !status) {
+  if (!user_id || !title || !content || !status_id) {
     return res.status(400).json({
       success: false,
       message: "All fields are required",
@@ -82,7 +82,7 @@ export const handleCreateTask = async (req, res) => {
   }
 
   try {
-    await createTask(user_id, title, content, status);
+    await createTask(user_id, title, content, status_id);
 
     return res.status(201).json({
       success: true,

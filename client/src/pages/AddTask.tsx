@@ -59,7 +59,10 @@ export default function AddTask() {
             {...register("content")}
             error={errors.content?.message}
           />
-          <FormSelect label="Status" {...register("status")} />
+          <FormSelect
+            label="Status"
+            {...register("status_id", { valueAsNumber: true })}
+          />
           <button className="w-full rounded-md bg-primary py-3 font-bold tracking-wider text-white">
             Add
           </button>

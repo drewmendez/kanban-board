@@ -19,7 +19,7 @@ export type SignInForm = z.infer<typeof SignInFormSchema>;
 export const TaskFormSchema = z.object({
   title: z.string().trim().min(1, "This field is required"),
   content: z.string().trim().min(1, "This field is required"),
-  status: z.string(),
+  status_id: z.number(),
 });
 
 export type TaskForm = z.infer<typeof TaskFormSchema>;

@@ -30,11 +30,20 @@ export const getTasksByStatus = async (status) => {
   return result;
 };
 
-export const createTask = async (user_id, title, content, status) => {
-  await pool.query(
-    "INSERT INTO tasks (user_id, title, content, status) VALUES (?,?,?,?)",
-    [user_id, title, content, status]
-  );
+export const createTask = async (user_id, title, content, status_id) => {
+  const query = `
+    INSERT INTO tasks (user_id, title, content, order_id, status_id)
+    SELECT 
+	    ?,
+      ?,
+      ?,
+      IFNULL(MAX(order_id), 0) + 1,
+      ?
+    FROM tasks
+    WHERE status_id = ?
+  `;
+
+  await pool.query(query, [user_id, title, content, status_id, status_id]);
 };
 
 export const updateTask = async (task_id, title, content, status) => {
