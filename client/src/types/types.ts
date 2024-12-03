@@ -46,3 +46,8 @@ export type CurrentUser = {
   user_id: number;
   user: string;
 };
+
+export type Status = {
+  status_id: number;
+  status_title: string;
+};

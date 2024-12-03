@@ -1,7 +1,11 @@
 import { Plus } from "lucide-react";
 import { Link } from "react-router-dom";
 
-import { useGetAllTask, useUpdateTaskStatus } from "../services/tasksServices";
+import {
+  useGetAllTask,
+  useGetStatuses,
+  useUpdateTaskStatus,
+} from "../services/tasksServices";
 import {
   DndContext,
   DragEndEvent,
@@ -16,7 +20,7 @@ import TaskCard from "../components/TaskCard";
 import TasksContainer from "../components/TaskContainer";
 
 export default function TasksPage() {
-  const containers = ["todo", "in-progress", "completed"];
+  const { data: containers } = useGetStatuses();
   const [tasks, setTasks] = useState<Task[]>([]);
 
   const [activeId, setActiveId] = useState<UniqueIdentifier | null>(null);
@@ -59,15 +63,18 @@ export default function TasksPage() {
       <div className="container h-full pb-20 pt-14">
         <div className="grid h-full grid-cols-3 gap-5">
           <DndContext onDragEnd={handleDragEnd} onDragStart={handleDragStart}>
-            {containers.map((container) => (
-              <div key={container}>
+            {containers?.map((container) => (
+              <div key={container.status_id}>
                 <p
-                  className={`rounded-tl-xl rounded-tr-xl py-3 text-center font-bold uppercase tracking-wider text-white ${container === "todo" ? "bg-red-400" : container === "in-progress" ? "bg-blue-400" : "bg-green-400"}`}
+                  className={`rounded-tl-xl rounded-tr-xl py-3 text-center font-bold uppercase tracking-wider text-white ${container.status_title === "todo" ? "bg-red-400" : container.status_title === "in-progress" ? "bg-blue-400" : "bg-green-400"}`}
                 >
-                  {container}
+                  {container.status_title}
                 </p>
 
-                <TasksContainer container={container} tasks={tasks} />
+                <TasksContainer
+                  container={container.status_title}
+                  tasks={tasks}
+                />
               </div>
             ))}
 

@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiClient } from "./apiClient";
-import { Task, TaskForm, TaskPost } from "../types/types";
+import { Status, Task, TaskForm, TaskPost } from "../types/types";
 
 export const useGetAllTask = () => {
   return useQuery<Task[]>({
@@ -75,6 +75,16 @@ export const useUpdateTaskStatus = () => {
       data: { status: string };
     }) => {
       return await apiClient.patch(`/tasks/${task_id}`, data);
+    },
+  });
+};
+
+export const useGetStatuses = () => {
+  return useQuery<Status[]>({
+    queryKey: ["statuses"],
+    queryFn: async () => {
+      const { data } = await apiClient.get("/statuses");
+      return data;
     },
   });
 };
