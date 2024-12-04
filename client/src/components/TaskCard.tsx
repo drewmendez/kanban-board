@@ -3,40 +3,57 @@ import { useAuth } from "../context/AuthContext";
 import { useDeleteTask } from "../services/tasksServices";
 import { Link } from "react-router-dom";
 import { type Task } from "../types/types";
-import { SyntheticListenerMap } from "@dnd-kit/core/dist/hooks/utilities";
-import { DraggableAttributes } from "@dnd-kit/core";
+import { CSS } from "@dnd-kit/utilities";
 
-type TaskProps = Task & {
-  listeners?: SyntheticListenerMap | undefined;
-  attributes?: DraggableAttributes;
-  setActivatorNodeRef?: (element: HTMLElement | null) => void;
-};
+import { useSortable } from "@dnd-kit/sortable";
 
-export default function TaskCard({
-  task_id,
-  author,
-  title,
-  content,
-  listeners,
-  attributes,
-  setActivatorNodeRef,
-}: TaskProps) {
+interface TaskProps extends React.HTMLAttributes<HTMLDivElement> {
+  task: Task;
+  isOverlay?: boolean;
+}
+
+export default function TaskCard({ task, isOverlay }: TaskProps) {
+  const { task_id, author, title, content } = task;
+
   const { currentUser } = useAuth();
   const { mutate: deleteTask } = useDeleteTask();
+
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({
+    id: task.task_id,
+    data: {
+      type: "task",
+      task,
+    },
+  });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  };
 
   const handleDeleteTask = () => {
     deleteTask(task_id);
   };
 
   return (
-    <div className="divide-y rounded-md bg-bgWhite p-4 shadow-md">
+    <div
+      className={`relative divide-y rounded-md bg-bgWhite p-4 shadow-md ${isDragging && "invisible"}`}
+      ref={isOverlay ? undefined : setNodeRef}
+      style={isOverlay ? undefined : style}
+    >
       <p className="flex justify-between py-2 font-semibold text-slate-500 first:pt-0">
-        <span>{title}</span>{" "}
+        <span>{title}</span>
         <button
-          {...listeners}
-          {...attributes}
-          ref={setActivatorNodeRef}
-          className="touch-none"
+          {...(isOverlay ? {} : listeners)}
+          {...(isOverlay ? {} : attributes)}
+          className="touch-none active:cursor-grabbing"
         >
           <Move />
         </button>

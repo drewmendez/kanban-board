@@ -18,7 +18,7 @@ export const handleGetAllTasks = async (req, res) => {
         author: `${item.firstname} ${item.lastname}`,
         title: item.title,
         content: item.content,
-        status: item.status,
+        status_id: item.status_id,
       };
     });
 
@@ -47,10 +47,10 @@ export const handleGetTask = async (req, res) => {
 };
 
 export const handleGetTasksByStatus = async (req, res) => {
-  const { status } = req.query;
-
   try {
-    const result = await getTasksByStatus(status);
+    const status_id = parseInt(req.query.status_id);
+
+    const result = await getTasksByStatus(status_id);
 
     const tasks = result.map((item) => {
       return {
@@ -58,7 +58,7 @@ export const handleGetTasksByStatus = async (req, res) => {
         author: `${item.firstname} ${item.lastname}`,
         title: item.title,
         content: item.content,
-        status: item.status,
+        status_id: item.status_id,
       };
     });
 

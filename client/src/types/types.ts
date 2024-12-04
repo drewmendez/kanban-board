@@ -29,7 +29,7 @@ export interface Task {
   author?: string;
   title: string;
   content: string;
-  status: "todo" | "in-progress" | "completed";
+  status_id: number;
 }
 
 export type TaskPost = TaskForm & {

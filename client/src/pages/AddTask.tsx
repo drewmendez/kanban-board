@@ -61,6 +61,8 @@ export default function AddTask() {
           />
           <FormSelect
             label="Status"
+            className="pointer-events-none max-w-max rounded-lg border p-2 uppercase outline-none"
+            tabIndex={-1}
             {...register("status_id", { valueAsNumber: true })}
           />
           <button className="w-full rounded-md bg-primary py-3 font-bold tracking-wider text-white">

@@ -16,7 +16,7 @@ export default function Navbar() {
   };
 
   return (
-    <header className="fixed top-0 w-full bg-bgWhite py-6 shadow-lg">
+    <header className="fixed top-0 z-20 w-full bg-bgWhite py-6 shadow-lg">
       <nav className="container flex items-center justify-between">
         <Logo />
         {currentUser ? (

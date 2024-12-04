@@ -22,11 +22,11 @@ export const useGetTaskById = (task_id: number) => {
   });
 };
 
-export const useGetTasksByStatus = (status: string) => {
+export const useGetTasksByStatusId = (status_id: number) => {
   return useQuery<Task[]>({
-    queryKey: ["tasks", status],
+    queryKey: ["tasks", status_id],
     queryFn: async () => {
-      const response = await apiClient.get(`/tasks?status=${status}`);
+      const response = await apiClient.get(`/tasks?status=${status_id}`);
       return response.data;
     },
   });
@@ -72,7 +72,7 @@ export const useUpdateTaskStatus = () => {
       data,
     }: {
       task_id: number;
-      data: { status: string };
+      data: { status_id: number };
     }) => {
       return await apiClient.patch(`/tasks/${task_id}`, data);
     },

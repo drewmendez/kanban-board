@@ -28,7 +28,7 @@ const router = createBrowserRouter([
         element: <TasksPage />,
       },
       {
-        path: "/tasks/add-task",
+        path: "/tasks/add-task/:status_id",
         element: <AddTask />,
       },
       {
