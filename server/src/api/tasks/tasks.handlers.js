@@ -18,6 +18,7 @@ export const handleGetAllTasks = async (req, res) => {
         author: `${item.firstname} ${item.lastname}`,
         title: item.title,
         content: item.content,
+        order_id: item.order_id,
         status_id: item.status_id,
       };
     });
@@ -97,9 +98,9 @@ export const handleCreateTask = async (req, res) => {
 };
 
 export const handleUpdateTask = async (req, res) => {
-  const { title, content, status } = req.body;
+  const { title, content, status_id, old_status_id } = req.body;
 
-  if (!title || !content || !status) {
+  if (!title || !content || !status_id || !old_status_id) {
     return res.status(400).json({
       success: false,
       message: "All fields are required",
@@ -109,7 +110,7 @@ export const handleUpdateTask = async (req, res) => {
   try {
     const parsedId = parseInt(req.params.task_id);
 
-    await updateTask(parsedId, title, content, status);
+    await updateTask(parsedId, title, content, status_id, old_status_id);
 
     return res.status(201).json({
       success: true,

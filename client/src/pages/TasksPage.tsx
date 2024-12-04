@@ -82,6 +82,8 @@ export default function TasksPage() {
   const handleDragOver = (event: DragOverEvent) => {
     const { active, over } = event;
 
+    console.log(active.data.current?.task);
+
     if (!over) return;
 
     const activeTaskId = active.id;

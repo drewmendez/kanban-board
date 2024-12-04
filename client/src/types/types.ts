@@ -26,9 +26,10 @@ export type TaskForm = z.infer<typeof TaskFormSchema>;
 
 export interface Task {
   task_id: number;
-  author?: string;
+  author: string;
   title: string;
   content: string;
+  order_id: number;
   status_id: number;
 }
 

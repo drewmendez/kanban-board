@@ -4,6 +4,7 @@ import TaskCard from "./TaskCard";
 import { SortableContext } from "@dnd-kit/sortable";
 import { Link } from "react-router-dom";
 import { Plus } from "lucide-react";
+import { useMemo } from "react";
 
 interface TasksContainerProp {
   tasks: Task[];
@@ -22,9 +23,11 @@ export default function TasksContainer({
     },
   });
 
+  const taskIds = useMemo(() => tasks.map((task) => task.task_id), [tasks]);
+
   return (
     <>
-      <SortableContext items={tasks.map((task) => task.task_id)}>
+      <SortableContext items={taskIds}>
         <div
           className="scrollbar flex max-h-[620px] min-h-[173px] flex-col gap-4 overflow-y-auto overflow-x-hidden rounded-bl-xl rounded-br-xl bg-slate-200 p-4 shadow-lg"
           ref={setNodeRef}

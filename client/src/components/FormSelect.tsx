@@ -19,13 +19,10 @@ const FormSelect = React.forwardRef<HTMLSelectElement, FormSelectProp>(
           className="max-w-max cursor-pointer rounded-lg border p-2 uppercase outline-none"
           {...props}
           ref={ref}
+          defaultValue={params.status_id ? Number(params.status_id) : ""}
         >
           {statuses?.map((status) => (
-            <option
-              key={status.status_id}
-              value={status.status_id}
-              selected={Number(params.status_id) === status.status_id}
-            >
+            <option key={status.status_id} value={status.status_id}>
               {status.status_title}
             </option>
           ))}

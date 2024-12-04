@@ -58,7 +58,7 @@ export const useUpdateTask = () => {
       data,
     }: {
       task_id: number;
-      data: TaskForm;
+      data: TaskForm & { old_status_id: number };
     }) => {
       return await apiClient.put(`/tasks/${task_id}`, data);
     },
