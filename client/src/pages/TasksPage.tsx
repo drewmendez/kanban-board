@@ -39,8 +39,6 @@ export default function TasksPage() {
     const activeTaskId = active.id;
     const overId = over?.id;
 
-    if (activeTaskId === overId) return;
-
     // Update status and reorder in database
     updateStatusAndReorder({
       task_id: activeTask?.task_id!,
@@ -50,6 +48,8 @@ export default function TasksPage() {
         old_status_id: activeTask?.status_id!,
       },
     });
+
+    if (activeTaskId === overId) return;
 
     if (!over) return;
 
