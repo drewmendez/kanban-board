@@ -19,17 +19,18 @@ export type SignInForm = z.infer<typeof SignInFormSchema>;
 export const TaskFormSchema = z.object({
   title: z.string().trim().min(1, "This field is required"),
   content: z.string().trim().min(1, "This field is required"),
-  status: z.string(),
+  status_id: z.number(),
 });
 
 export type TaskForm = z.infer<typeof TaskFormSchema>;
 
 export interface Task {
   task_id: number;
-  author?: string;
+  author: string;
   title: string;
   content: string;
-  status: "todo" | "in-progress" | "completed";
+  order_id: number;
+  status_id: number;
 }
 
 export type TaskPost = TaskForm & {
@@ -45,4 +46,9 @@ export interface ApiResponse {
 export type CurrentUser = {
   user_id: number;
   user: string;
+};
+
+export type Status = {
+  status_id: number;
+  status_title: string;
 };

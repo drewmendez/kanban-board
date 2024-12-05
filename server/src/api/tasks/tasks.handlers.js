@@ -5,7 +5,7 @@ import {
   getTask,
   getTasksByStatus,
   updateTask,
-  updateTaskStatus,
+  updateTaskStatusAndReorder,
 } from "./tasks.services.js";
 
 export const handleGetAllTasks = async (req, res) => {
@@ -18,7 +18,8 @@ export const handleGetAllTasks = async (req, res) => {
         author: `${item.firstname} ${item.lastname}`,
         title: item.title,
         content: item.content,
-        status: item.status,
+        order_id: item.order_id,
+        status_id: item.status_id,
       };
     });
 
@@ -47,10 +48,10 @@ export const handleGetTask = async (req, res) => {
 };
 
 export const handleGetTasksByStatus = async (req, res) => {
-  const { status } = req.query;
-
   try {
-    const result = await getTasksByStatus(status);
+    const status_id = parseInt(req.query.status_id);
+
+    const result = await getTasksByStatus(status_id);
 
     const tasks = result.map((item) => {
       return {
@@ -58,7 +59,7 @@ export const handleGetTasksByStatus = async (req, res) => {
         author: `${item.firstname} ${item.lastname}`,
         title: item.title,
         content: item.content,
-        status: item.status,
+        status_id: item.status_id,
       };
     });
 
@@ -72,9 +73,9 @@ export const handleGetTasksByStatus = async (req, res) => {
 };
 
 export const handleCreateTask = async (req, res) => {
-  const { user_id, title, content, status } = req.body;
+  const { user_id, title, content, status_id } = req.body;
 
-  if (!user_id || !title || !content || !status) {
+  if (!user_id || !title || !content || !status_id) {
     return res.status(400).json({
       success: false,
       message: "All fields are required",
@@ -82,7 +83,7 @@ export const handleCreateTask = async (req, res) => {
   }
 
   try {
-    await createTask(user_id, title, content, status);
+    await createTask(user_id, title, content, status_id);
 
     return res.status(201).json({
       success: true,
@@ -97,9 +98,9 @@ export const handleCreateTask = async (req, res) => {
 };
 
 export const handleUpdateTask = async (req, res) => {
-  const { title, content, status } = req.body;
+  const { title, content, status_id, old_status_id } = req.body;
 
-  if (!title || !content || !status) {
+  if (!title || !content || !status_id || !old_status_id) {
     return res.status(400).json({
       success: false,
       message: "All fields are required",
@@ -109,7 +110,7 @@ export const handleUpdateTask = async (req, res) => {
   try {
     const parsedId = parseInt(req.params.task_id);
 
-    await updateTask(parsedId, title, content, status);
+    await updateTask(parsedId, title, content, status_id, old_status_id);
 
     return res.status(201).json({
       success: true,
@@ -123,13 +124,18 @@ export const handleUpdateTask = async (req, res) => {
   }
 };
 
-export const handleUpdateTaskStatus = async (req, res) => {
-  const { status } = req.body;
+export const handleUpdateTaskStatusAndReorder = async (req, res) => {
+  const { status_id, order_id, old_status_id } = req.body;
 
   try {
     const parsedId = parseInt(req.params.task_id);
 
-    await updateTaskStatus(parsedId, status);
+    await updateTaskStatusAndReorder(
+      parsedId,
+      status_id,
+      order_id,
+      old_status_id
+    );
 
     return res.status(201).json({
       success: true,
@@ -146,8 +152,9 @@ export const handleUpdateTaskStatus = async (req, res) => {
 export const handleDeleteTask = async (req, res) => {
   try {
     const parsedId = parseInt(req.params.task_id);
+    const status_id = parseInt(req.params.status_id);
 
-    await deleteTask(parsedId);
+    await deleteTask(parsedId, status_id);
 
     return res.status(200).json({
       success: true,

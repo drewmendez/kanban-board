@@ -1,92 +1,175 @@
-import { Plus } from "lucide-react";
-import { Link } from "react-router-dom";
-
-import { useGetAllTask, useUpdateTaskStatus } from "../services/tasksServices";
+import { useState } from "react";
+import {
+  useGetAllTask,
+  useGetStatuses,
+  useUpdateTaskStatusAndReorder,
+} from "../services/tasksServices";
+import { createPortal } from "react-dom";
 import {
   DndContext,
   DragEndEvent,
+  DragOverEvent,
   DragOverlay,
   DragStartEvent,
-  UniqueIdentifier,
 } from "@dnd-kit/core";
-
-import { useEffect, useState } from "react";
+import { arrayMove } from "@dnd-kit/sortable";
 import { Task } from "../types/types";
 import TaskCard from "../components/TaskCard";
 import TasksContainer from "../components/TaskContainer";
+import { useTasks } from "../hooks/useTasks";
 
 export default function TasksPage() {
-  const containers = ["todo", "in-progress", "completed"];
-  const [tasks, setTasks] = useState<Task[]>([]);
+  const { data: containers } = useGetStatuses();
+  const { data: initialTasks } = useGetAllTask();
+  const { mutate: updateStatusAndReorder } = useUpdateTaskStatusAndReorder();
 
-  const [activeId, setActiveId] = useState<UniqueIdentifier | null>(null);
+  const { tasks, setTasks } = useTasks(initialTasks);
 
-  const { data: initialTasks, isFetching } = useGetAllTask();
-  const { mutate: updateStatus } = useUpdateTaskStatus();
-
-  useEffect(() => {
-    if (!isFetching && initialTasks) {
-      setTasks(initialTasks);
-    }
-  }, [isFetching]);
+  const [activeTask, setActiveTask] = useState<Task | null>(null);
+  const [orderId, setOrderId] = useState<number | null>(null);
+  const [targetStatusId, setTargetStatusId] = useState<number | null>(null);
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
 
+    setActiveTask(null);
+    setTargetStatusId(null);
+    setOrderId(null);
+
+    const activeTaskId = active.id;
+    const overId = over?.id;
+
+    if (activeTaskId === overId) return;
+
+    // Update status and reorder in database
+    updateStatusAndReorder({
+      task_id: activeTask?.task_id!,
+      data: {
+        status_id: targetStatusId!,
+        order_id: orderId!,
+        old_status_id: activeTask?.status_id!,
+      },
+    });
+
     if (!over) return;
 
-    const taskId = active.id as number;
-    const newStatus = over.id as Task["status"];
+    const isOverATask = over.data.current?.type === "task";
 
-    setTasks(() =>
-      tasks.map((task) =>
-        task.task_id === taskId ? { ...task, status: newStatus } : task,
-      ),
-    );
+    if (isOverATask) {
+      setTasks((tasks) => {
+        const activeTaskIndex = tasks.findIndex(
+          (task) => task.task_id === activeTaskId,
+        );
+        const overTaskIndex = tasks.findIndex(
+          (task) => task.task_id === overId,
+        );
 
-    // update status in database
-    updateStatus({ task_id: taskId, data: { status: newStatus } });
+        tasks[activeTaskIndex].status_id = tasks[overTaskIndex].status_id;
 
-    setActiveId(null);
+        return arrayMove(tasks, activeTaskIndex, overTaskIndex);
+      });
+    } else {
+      setTasks((tasks) => {
+        const activeTaskIndex = tasks.findIndex(
+          (task) => task.task_id === activeTaskId,
+        );
+
+        tasks[activeTaskIndex].status_id =
+          over.data.current?.container.status_id;
+
+        return arrayMove(tasks, activeTaskIndex, activeTaskIndex);
+      });
+    }
   };
 
   const handleDragStart = (event: DragStartEvent) => {
-    setActiveId(event.active.id);
+    // Spread the active task object to have a separate reference from the tasks array.
+    setActiveTask({ ...event.active.data.current?.task });
+  };
+
+  const handleDragOver = (event: DragOverEvent) => {
+    const { active, over } = event;
+
+    if (!over) return;
+
+    const activeTaskId = active.id;
+    const overId = over.id;
+
+    const targetOverStatusId =
+      over.data.current?.task?.status_id ||
+      over.data.current?.container?.status_id;
+
+    setTargetStatusId(targetOverStatusId);
+
+    if (activeTaskId === overId) return;
+
+    const isOverATask = over.data.current?.type === "task";
+
+    if (isOverATask) {
+      setOrderId(over.data.current?.task.order_id);
+
+      setTasks((tasks) => {
+        const activeTaskIndex = tasks.findIndex(
+          (task) => task.task_id === activeTaskId,
+        );
+        const overTaskIndex = tasks.findIndex(
+          (task) => task.task_id === overId,
+        );
+
+        tasks[activeTaskIndex].status_id = tasks[overTaskIndex].status_id;
+
+        return arrayMove(tasks, activeTaskIndex, overTaskIndex);
+      });
+    } else {
+      setOrderId(1);
+
+      setTasks((tasks) => {
+        const activeTaskIndex = tasks.findIndex(
+          (task) => task.task_id === activeTaskId,
+        );
+
+        tasks[activeTaskIndex].status_id =
+          over.data.current?.container.status_id;
+
+        return arrayMove(tasks, activeTaskIndex, activeTaskIndex);
+      });
+    }
   };
 
   return (
-    <main className="h-screen bg-bgWhite py-[96px]">
-      <div className="container h-full pb-20 pt-14">
-        <div className="grid h-full grid-cols-3 gap-5">
-          <DndContext onDragEnd={handleDragEnd} onDragStart={handleDragStart}>
-            {containers.map((container) => (
-              <div key={container}>
+    <main className="h-screen bg-bgWhite pt-[96px]">
+      <div className="container h-full pt-10">
+        <DndContext
+          onDragEnd={handleDragEnd}
+          onDragStart={handleDragStart}
+          onDragOver={handleDragOver}
+        >
+          <div className="flex gap-5">
+            {containers?.map((container) => (
+              <div key={container.status_id} className="flex-1">
                 <p
-                  className={`rounded-tl-xl rounded-tr-xl py-3 text-center font-bold uppercase tracking-wider text-white ${container === "todo" ? "bg-red-400" : container === "in-progress" ? "bg-blue-400" : "bg-green-400"}`}
+                  className={`rounded-tl-xl rounded-tr-xl py-3 text-center font-bold uppercase tracking-wider text-white ${container.status_title === "todo" ? "bg-red-400" : container.status_title === "in-progress" ? "bg-blue-400" : "bg-green-400"}`}
                 >
-                  {container}
+                  {container.status_title}
                 </p>
 
-                <TasksContainer container={container} tasks={tasks} />
+                <TasksContainer
+                  tasks={tasks.filter(
+                    (task) => task.status_id === container.status_id,
+                  )}
+                  container={container}
+                />
               </div>
             ))}
+          </div>
 
+          {createPortal(
             <DragOverlay>
-              {activeId ? (
-                <TaskCard
-                  {...tasks.find((task) => task.task_id === activeId)!}
-                />
-              ) : null}
-            </DragOverlay>
-          </DndContext>
-        </div>
-
-        <Link
-          to="/tasks/add-task"
-          className="mx-auto mt-16 flex max-w-max gap-2 rounded-xl bg-primary px-6 py-3 font-bold text-white"
-        >
-          Add Task <Plus />
-        </Link>
+              {activeTask && <TaskCard task={activeTask} isOverlay />}
+            </DragOverlay>,
+            document.body,
+          )}
+        </DndContext>
       </div>
     </main>
   );

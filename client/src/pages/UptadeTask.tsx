@@ -29,13 +29,20 @@ export default function UptadeTask() {
     reset({
       title: task?.title,
       content: task?.content,
-      status: task?.status,
+      status_id: task?.status_id,
     });
   }, [task, reset]);
 
   const onSubmit = (data: TaskForm) => {
+    const oldStatusId = task?.status_id;
+
+    const updateData = {
+      ...data,
+      old_status_id: oldStatusId!,
+    };
+
     updateTask(
-      { task_id: parsedTask_id, data },
+      { task_id: parsedTask_id, data: updateData },
       { onSuccess: () => navigate("/tasks", { replace: true }) },
     );
   };
@@ -69,8 +76,8 @@ export default function UptadeTask() {
           />
           <FormSelect
             label="Status"
-            {...register("status")}
-            error={errors.status?.message}
+            {...register("status_id", { valueAsNumber: true })}
+            error={errors.status_id?.message}
           />
           <button className="w-full rounded-md bg-primary py-3 font-bold tracking-wider text-white">
             Update
