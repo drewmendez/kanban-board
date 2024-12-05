@@ -9,6 +9,7 @@ export const useGetAllTask = () => {
       const response = await apiClient.get("/tasks/all");
       return response.data;
     },
+    staleTime: Infinity,
   });
 };
 
@@ -33,9 +34,14 @@ export const useGetTasksByStatusId = (status_id: number) => {
 };
 
 export const useAddTask = () => {
+  const queryClient = useQueryClient();
+
   return useMutation({
     mutationFn: async (data: TaskPost) => {
       return await apiClient.post("/tasks", data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["tasks"] });
     },
   });
 };
@@ -44,14 +50,22 @@ export const useDeleteTask = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (task_id: number) => {
-      return await apiClient.delete(`/tasks/${task_id}`);
+    mutationFn: async ({
+      task_id,
+      status_id,
+    }: {
+      task_id: number;
+      status_id: number;
+    }) => {
+      return await apiClient.delete(`/tasks/${task_id}/${status_id}`);
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["tasks"] }),
   });
 };
 
 export const useUpdateTask = () => {
+  const queryClient = useQueryClient();
+
   return useMutation({
     mutationFn: async ({
       task_id,
@@ -62,20 +76,24 @@ export const useUpdateTask = () => {
     }) => {
       return await apiClient.put(`/tasks/${task_id}`, data);
     },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["tasks"] }),
   });
 };
 
-export const useUpdateTaskStatus = () => {
+export const useUpdateTaskStatusAndReorder = () => {
+  const queryClient = useQueryClient();
+
   return useMutation({
     mutationFn: async ({
       task_id,
       data,
     }: {
       task_id: number;
-      data: { status_id: number };
+      data: { status_id: number; order_id: number; old_status_id: number };
     }) => {
       return await apiClient.patch(`/tasks/${task_id}`, data);
     },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["tasks"] }),
   });
 };
 
@@ -86,5 +104,6 @@ export const useGetStatuses = () => {
       const { data } = await apiClient.get("/statuses");
       return data;
     },
+    staleTime: Infinity,
   });
 };

@@ -1,8 +1,8 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   useGetAllTask,
   useGetStatuses,
-  useUpdateTaskStatus,
+  useUpdateTaskStatusAndReorder,
 } from "../services/tasksServices";
 import { createPortal } from "react-dom";
 import {
@@ -16,33 +16,42 @@ import { arrayMove } from "@dnd-kit/sortable";
 import { Task } from "../types/types";
 import TaskCard from "../components/TaskCard";
 import TasksContainer from "../components/TaskContainer";
+import { useTasks } from "../hooks/useTasks";
 
 export default function TasksPage() {
   const { data: containers } = useGetStatuses();
-  const [tasks, setTasks] = useState<Task[]>([]);
+  const { data: initialTasks } = useGetAllTask();
+  const { mutate: updateStatusAndReorder } = useUpdateTaskStatusAndReorder();
+
+  const { tasks, setTasks } = useTasks(initialTasks);
 
   const [activeTask, setActiveTask] = useState<Task | null>(null);
-
-  const { data: initialTasks, isFetching } = useGetAllTask();
-  const { mutate: updateStatus } = useUpdateTaskStatus();
-
-  useEffect(() => {
-    if (!isFetching && initialTasks) {
-      setTasks(initialTasks);
-    }
-  }, [isFetching]);
+  const [orderId, setOrderId] = useState<number | null>(null);
+  const [targetStatusId, setTargetStatusId] = useState<number | null>(null);
 
   const handleDragEnd = (event: DragEndEvent) => {
-    // update status in database
-    // updateStatus({ task_id: taskId, data: { status_id: newStatus } });
     const { active, over } = event;
 
-    if (!over) return;
+    setActiveTask(null);
+    setTargetStatusId(null);
+    setOrderId(null);
 
     const activeTaskId = active.id;
-    const overId = over.id;
+    const overId = over?.id;
 
     if (activeTaskId === overId) return;
+
+    // Update status and reorder in database
+    updateStatusAndReorder({
+      task_id: activeTask?.task_id!,
+      data: {
+        status_id: targetStatusId!,
+        order_id: orderId!,
+        old_status_id: activeTask?.status_id!,
+      },
+    });
+
+    if (!over) return;
 
     const isOverATask = over.data.current?.type === "task";
 
@@ -71,29 +80,34 @@ export default function TasksPage() {
         return arrayMove(tasks, activeTaskIndex, activeTaskIndex);
       });
     }
-
-    setActiveTask(null);
   };
 
   const handleDragStart = (event: DragStartEvent) => {
-    setActiveTask(event.active.data.current?.task);
+    // Spread the active task object to have a separate reference from the tasks array.
+    setActiveTask({ ...event.active.data.current?.task });
   };
 
   const handleDragOver = (event: DragOverEvent) => {
     const { active, over } = event;
-
-    console.log(active.data.current?.task);
 
     if (!over) return;
 
     const activeTaskId = active.id;
     const overId = over.id;
 
+    const targetOverStatusId =
+      over.data.current?.task?.status_id ||
+      over.data.current?.container?.status_id;
+
+    setTargetStatusId(targetOverStatusId);
+
     if (activeTaskId === overId) return;
 
     const isOverATask = over.data.current?.type === "task";
 
     if (isOverATask) {
+      setOrderId(over.data.current?.task.order_id);
+
       setTasks((tasks) => {
         const activeTaskIndex = tasks.findIndex(
           (task) => task.task_id === activeTaskId,
@@ -107,6 +121,8 @@ export default function TasksPage() {
         return arrayMove(tasks, activeTaskIndex, overTaskIndex);
       });
     } else {
+      setOrderId(1);
+
       setTasks((tasks) => {
         const activeTaskIndex = tasks.findIndex(
           (task) => task.task_id === activeTaskId,

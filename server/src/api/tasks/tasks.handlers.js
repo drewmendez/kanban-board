@@ -5,7 +5,7 @@ import {
   getTask,
   getTasksByStatus,
   updateTask,
-  updateTaskStatus,
+  updateTaskStatusAndReorder,
 } from "./tasks.services.js";
 
 export const handleGetAllTasks = async (req, res) => {
@@ -124,13 +124,18 @@ export const handleUpdateTask = async (req, res) => {
   }
 };
 
-export const handleUpdateTaskStatus = async (req, res) => {
-  const { status } = req.body;
+export const handleUpdateTaskStatusAndReorder = async (req, res) => {
+  const { status_id, order_id, old_status_id } = req.body;
 
   try {
     const parsedId = parseInt(req.params.task_id);
 
-    await updateTaskStatus(parsedId, status);
+    await updateTaskStatusAndReorder(
+      parsedId,
+      status_id,
+      order_id,
+      old_status_id
+    );
 
     return res.status(201).json({
       success: true,
@@ -147,8 +152,9 @@ export const handleUpdateTaskStatus = async (req, res) => {
 export const handleDeleteTask = async (req, res) => {
   try {
     const parsedId = parseInt(req.params.task_id);
+    const status_id = parseInt(req.params.status_id);
 
-    await deleteTask(parsedId);
+    await deleteTask(parsedId, status_id);
 
     return res.status(200).json({
       success: true,

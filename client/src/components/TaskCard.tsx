@@ -13,7 +13,7 @@ interface TaskProps extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 export default function TaskCard({ task, isOverlay }: TaskProps) {
-  const { task_id, author, title, content } = task;
+  const { task_id, author, title, content, status_id } = task;
 
   const { currentUser } = useAuth();
   const { mutate: deleteTask } = useDeleteTask();
@@ -31,6 +31,10 @@ export default function TaskCard({ task, isOverlay }: TaskProps) {
       type: "task",
       task,
     },
+    transition: {
+      duration: 115,
+      easing: "",
+    },
   });
 
   const style = {
@@ -39,12 +43,12 @@ export default function TaskCard({ task, isOverlay }: TaskProps) {
   };
 
   const handleDeleteTask = () => {
-    deleteTask(task_id);
+    deleteTask({ task_id, status_id });
   };
 
   return (
     <div
-      className={`relative divide-y rounded-md bg-bgWhite p-4 shadow-md ${isDragging && "invisible"}`}
+      className={`relative divide-y rounded-md bg-bgWhite p-4 shadow-md ${isDragging && "opacity-30"} ${isOverlay && "shadow-2xl outline outline-1 outline-gray-200"}`}
       ref={isOverlay ? undefined : setNodeRef}
       style={isOverlay ? undefined : style}
     >
@@ -58,7 +62,7 @@ export default function TaskCard({ task, isOverlay }: TaskProps) {
           <Move />
         </button>
       </p>
-      <p className="py-2 text-slate-400">{content}</p>
+      <p className="whitespace-pre-wrap py-2 text-slate-400">{content}</p>
       <div className="flex items-center justify-between py-2 last:pb-0">
         <p className="text-xs text-slate-400">
           Added by: {currentUser?.user === author ? "You" : author}

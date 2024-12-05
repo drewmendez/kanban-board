@@ -37,6 +37,7 @@ export const getTasksByStatus = async (status_id) => {
 };
 
 export const createTask = async (user_id, title, content, status_id) => {
+  // create task and calculate order for tasks in the target status
   const query = `
     INSERT INTO tasks (user_id, title, content, order_id, status_id)
     SELECT 
@@ -60,6 +61,7 @@ export const updateTask = async (
   old_status_id
 ) => {
   if (status_id === old_status_id) {
+    // if status is not changed, only update the title and content
     await pool.query(
       `
         UPDATE tasks
@@ -69,10 +71,11 @@ export const updateTask = async (
       [title, content, task_id]
     );
   } else {
+    // update status and recalculate the order for tasks in the original status
     await pool.query(
       `
         WITH max_order AS (
-        SELECT MAX(order_id) + 1 AS next_order_id
+        SELECT IFNULL(MAX(order_id), 0) + 1 AS next_order_id
         FROM tasks
         WHERE status_id = ?
         )
@@ -90,23 +93,67 @@ export const updateTask = async (
   }
 };
 
-export const updateTaskStatus = async (task_id, status) => {
-  await pool.query(
-    `
-    UPDATE tasks
-    SET status = ?
-    WHERE task_id = ?
-    `,
-    [status, task_id]
-  );
+export const updateTaskStatusAndReorder = async (
+  task_id,
+  status_id,
+  order_id,
+  old_status_id
+) => {
+  if (status_id === old_status_id) {
+    await pool.query(
+      `
+        UPDATE tasks
+        SET order_id = ?
+        WHERE task_id = ?;
+
+        SET @row_number = 0;
+  
+        UPDATE tasks
+        SET order_id = @row_number := @row_number + 1
+        WHERE status_id = ?
+        ORDER BY order_id;        
+      `,
+      [order_id, task_id, status_id]
+    );
+  } else {
+    await pool.query(
+      `
+        UPDATE tasks
+        SET status_id = ?, order_id = ?
+        WHERE task_id = ?;
+  
+        SET @row_number = 0;
+  
+        UPDATE tasks
+        SET order_id = @row_number := @row_number + 1
+        WHERE status_id = ?
+        ORDER BY order_id;
+  
+        SET @row_number = 0;
+  
+        UPDATE tasks
+        SET order_id = @row_number := @row_number + 1
+        WHERE status_id = ?
+        ORDER BY order_id;
+      `,
+      [status_id, order_id, task_id, old_status_id, status_id]
+    );
+  }
 };
 
-export const deleteTask = async (task_id) => {
+export const deleteTask = async (task_id, status_id) => {
   await pool.query(
     `
-    DELETE FROM tasks
-    WHERE task_id = ?
+      DELETE FROM tasks
+      WHERE task_id = ?;
+
+      SET @row_number = 0;
+
+      UPDATE tasks
+      SET order_id = @row_number := @row_number + 1
+      WHERE status_id = ?
+      ORDER BY order_id;
     `,
-    [task_id]
+    [task_id, status_id]
   );
 };
