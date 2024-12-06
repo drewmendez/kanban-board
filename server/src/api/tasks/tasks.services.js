@@ -37,7 +37,7 @@ export const getTasksByStatus = async (status_id) => {
 };
 
 export const createTask = async (user_id, title, content, status_id) => {
-  // create task and calculate order for tasks in the target status
+  // Create task and calculate order for tasks in the target status
   const query = `
     INSERT INTO tasks (user_id, title, content, order_id, status_id)
     SELECT 
@@ -61,7 +61,7 @@ export const updateTask = async (
   old_status_id
 ) => {
   if (status_id === old_status_id) {
-    // if status is not changed, only update the title and content
+    // If status is not changed, only update the title and content
     await pool.query(
       `
         UPDATE tasks
@@ -71,7 +71,7 @@ export const updateTask = async (
       [title, content, task_id]
     );
   } else {
-    // update status and recalculate the order for tasks in the original status
+    // Update status and recalculate the order for tasks in the original status
     await pool.query(
       `
         WITH max_order AS (
@@ -102,22 +102,41 @@ export const updateTaskStatusAndReorder = async (
   if (status_id === old_status_id) {
     await pool.query(
       `
+        WITH old_order AS (
+	        SELECT order_id AS old_order_id
+          FROM tasks
+          WHERE task_id = ?
+        )
+        UPDATE tasks
+        SET order_id = order_id - 1
+        WHERE order_id > (SELECT old_order_id FROM old_order) AND status_id = ?;
+
+        UPDATE tasks
+        SET order_id = order_id + 1
+        WHERE order_id >= ? AND task_id != ? AND status_id = ?;
+
         UPDATE tasks
         SET order_id = ?
-        WHERE task_id = ?;
-
-        SET @row_number = 0;
-  
-        UPDATE tasks
-        SET order_id = @row_number := @row_number + 1
-        WHERE status_id = ?
-        ORDER BY order_id;        
+        WHERE task_id = ? AND status_id = ?;     
       `,
-      [order_id, task_id, status_id]
+      [
+        task_id,
+        status_id,
+        order_id,
+        task_id,
+        status_id,
+        order_id,
+        task_id,
+        status_id,
+      ]
     );
   } else {
     await pool.query(
       `
+        UPDATE tasks
+        SET order_id = order_id + 1
+        WHERE order_id >= ? AND status_id = ?;
+
         UPDATE tasks
         SET status_id = ?, order_id = ?
         WHERE task_id = ?;
@@ -128,15 +147,8 @@ export const updateTaskStatusAndReorder = async (
         SET order_id = @row_number := @row_number + 1
         WHERE status_id = ?
         ORDER BY order_id;
-  
-        SET @row_number = 0;
-  
-        UPDATE tasks
-        SET order_id = @row_number := @row_number + 1
-        WHERE status_id = ?
-        ORDER BY order_id;
       `,
-      [status_id, order_id, task_id, old_status_id, status_id]
+      [order_id, status_id, status_id, order_id, task_id, old_status_id]
     );
   }
 };
