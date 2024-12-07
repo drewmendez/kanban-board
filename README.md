@@ -6,8 +6,17 @@ A full-stack Kanban Board application built with React on the front end and Expr
 
 - User Authentication: Secure login and signup system to ensure only authorized users can access their boards.
 - Drag and Drop: Intuitive drag-and-drop interface to move tasks across columns.
-- Task Management: Create, update, and delete tasks organized by customizable columns (e.g., To Do, In Progress, Done).
-- Backend with Express and MySQL: An Express.js server with a MySQL database to handle user data and tasks, providing a robust back end for data storage and retrieval.
+- Task Management: Create, update, and delete tasks organized by columns (To Do, In Progress, Completed).
+
+## Screenshots
+
+### Demo
+
+![Kanban Board Demo](/screenshots/demo.gif)
+
+### ER Diagram
+
+![ER Diagram](/screenshots/EERD.png)
 
 ## Tech Stack
 
@@ -16,39 +25,57 @@ A full-stack Kanban Board application built with React on the front end and Expr
 
 ## Getting Started
 
-1. Clone the repository and install dependencies:
+1. **Clone the repository:**
 
    ```bash
    git clone https://github.com/drewmendez/kanban-board-webapp.git
    cd kanban-board-webapp
    ```
 
-2. Set up the frontend:
+2. **Install dependencies for frontend:**
 
-   - Navigate to the client folder and install dependencies:
+   ```bash
+   cd client
+   npm install
+   ```
 
-     ```bash
-     cd client
-     npm install
-     ```
+3. **Install dependencies for backend backend:**
 
-   - Run the client:
+   ```bash
+   cd ../server
+   npm install
+   ```
 
-     ```bash
-     npm run dev
-     ```
+4. **Setup database:**
 
-3. Set up the backend:
+   - Create a MySQL database.
+   - Run the provided SQL script located at `server/schema/dbSchema.sql` to set up the database tables.
 
-   - Go to the server directory and install dependencies, configure your MySQL database and environment variables for database connections and JWT secrets.
+5. **Configure environment variables:**
 
-     ```bash
-     cd server
-     npm install
-     ```
+   - In the `server` folder, create a `.env` file with the following:
 
-   - Run the server:
+   ```env
+   PORT=8080
 
-     ```bash
-     npm run dev
-     ```
+   MYSQL_HOST=localhost
+   MYSQL_USER=root
+   MYSQL_PASSWORD=yourpassword
+   MYSQL_DB=yourdbname
+
+   JWT_SECRET_KEY=yoursecretkey
+   ```
+
+6. **Start the backend server:**
+
+   ```bash
+   cd server
+   npm run dev
+   ```
+
+7. **Start the frontend server:**
+
+   ```bash
+   cd client
+   npm run dev
+   ```
