@@ -1,5 +1,4 @@
 import { Edit, Move, Trash } from "lucide-react";
-import { useAuth } from "../context/AuthContext";
 import { useDeleteTask } from "../services/tasksServices";
 import { Link } from "react-router-dom";
 import { type Task } from "../types/types";

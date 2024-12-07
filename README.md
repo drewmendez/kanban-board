@@ -19,8 +19,8 @@ A full-stack Kanban Board application built with React on the front end and Expr
 1. Clone the repository and install dependencies:
 
    ```bash
-   git clone https://github.com/drewmendez/kanban-board.git
-   cd kanban-board
+   git clone https://github.com/drewmendez/kanban-board-webapp.git
+   cd kanban-board-webapp
    ```
 
 2. Set up the frontend:
@@ -43,7 +43,7 @@ A full-stack Kanban Board application built with React on the front end and Expr
    - Go to the server directory and install dependencies, configure your MySQL database and environment variables for database connections and JWT secrets.
 
      ```bash
-     cd ../server
+     cd server
      npm install
      ```
 
