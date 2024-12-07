@@ -55,16 +55,16 @@ A full-stack Kanban Board application built with React on the front end and Expr
 
    - In the `server` folder, create a `.env` file with the following:
 
-   ```env
-   PORT=8080
+     ```env
+     PORT=8080
 
-   MYSQL_HOST=localhost
-   MYSQL_USER=root
-   MYSQL_PASSWORD=yourpassword
-   MYSQL_DB=yourdbname
+     MYSQL_HOST=localhost
+     MYSQL_USER=root
+     MYSQL_PASSWORD=yourpassword
+     MYSQL_DB=yourdbname
 
-   JWT_SECRET_KEY=yoursecretkey
-   ```
+     JWT_SECRET_KEY=yoursecretkey
+     ```
 
 6. **Start the backend server:**
 
