@@ -39,6 +39,8 @@ export default function TasksPage() {
     const activeTaskId = active.id;
     const overId = over?.id;
 
+    if (!orderId) return;
+
     // Update status and reorder in database
     updateStatusAndReorder({
       task_id: activeTask?.task_id!,
@@ -49,14 +51,16 @@ export default function TasksPage() {
       },
     });
 
-    if (activeTaskId === overId) return;
-
     if (!over) return;
+
+    if (activeTaskId === overId) return;
 
     const isOverATask = over.data.current?.type === "task";
 
     if (isOverATask) {
-      setTasks((tasks) => {
+      setTasks((data) => {
+        const tasks = [...data];
+
         const activeTaskIndex = tasks.findIndex(
           (task) => task.task_id === activeTaskId,
         );
@@ -64,12 +68,12 @@ export default function TasksPage() {
           (task) => task.task_id === overId,
         );
 
-        tasks[activeTaskIndex].status_id = tasks[overTaskIndex].status_id;
-
         return arrayMove(tasks, activeTaskIndex, overTaskIndex);
       });
     } else {
-      setTasks((tasks) => {
+      setTasks((data) => {
+        const tasks = [...data];
+
         const activeTaskIndex = tasks.findIndex(
           (task) => task.task_id === activeTaskId,
         );
@@ -106,9 +110,9 @@ export default function TasksPage() {
     const isOverATask = over.data.current?.type === "task";
 
     if (isOverATask) {
-      setOrderId(over.data.current?.task.order_id);
+      setTasks((data) => {
+        const tasks = [...data];
 
-      setTasks((tasks) => {
         const activeTaskIndex = tasks.findIndex(
           (task) => task.task_id === activeTaskId,
         );
@@ -116,20 +120,32 @@ export default function TasksPage() {
           (task) => task.task_id === overId,
         );
 
+        setOrderId(tasks[overTaskIndex].order_id);
+
         tasks[activeTaskIndex].status_id = tasks[overTaskIndex].status_id;
 
         return arrayMove(tasks, activeTaskIndex, overTaskIndex);
       });
-    } else {
-      setOrderId(1);
+    }
 
-      setTasks((tasks) => {
+    const isOverAContainer = over.data.current?.type === "container";
+
+    if (isOverAContainer) {
+      setTasks((data) => {
+        const tasks = [...data];
         const activeTaskIndex = tasks.findIndex(
           (task) => task.task_id === activeTaskId,
         );
 
-        tasks[activeTaskIndex].status_id =
-          over.data.current?.container.status_id;
+        const currentOverStatusId = over.data.current?.container.status_id;
+
+        const numOfTask = tasks.filter(
+          (task) => task.status_id === currentOverStatusId,
+        ).length;
+
+        tasks[activeTaskIndex].status_id = currentOverStatusId;
+
+        setOrderId(numOfTask || 1);
 
         return arrayMove(tasks, activeTaskIndex, activeTaskIndex);
       });

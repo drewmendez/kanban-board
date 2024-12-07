@@ -147,8 +147,23 @@ export const updateTaskStatusAndReorder = async (
         SET order_id = @row_number := @row_number + 1
         WHERE status_id = ?
         ORDER BY order_id;
+
+        SET @row_number = 0;
+  
+        UPDATE tasks
+        SET order_id = @row_number := @row_number + 1
+        WHERE status_id = ?
+        ORDER BY order_id;
       `,
-      [order_id, status_id, status_id, order_id, task_id, old_status_id]
+      [
+        order_id,
+        status_id,
+        status_id,
+        order_id,
+        task_id,
+        old_status_id,
+        status_id,
+      ]
     );
   }
 };
