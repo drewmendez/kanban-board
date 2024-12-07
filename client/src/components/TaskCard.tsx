@@ -13,9 +13,8 @@ interface TaskProps extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 export default function TaskCard({ task, isOverlay }: TaskProps) {
-  const { task_id, author, title, content, status_id } = task;
+  const { task_id, title, content, status_id } = task;
 
-  const { currentUser } = useAuth();
   const { mutate: deleteTask } = useDeleteTask();
 
   const {
@@ -63,10 +62,7 @@ export default function TaskCard({ task, isOverlay }: TaskProps) {
         </button>
       </p>
       <p className="whitespace-pre-wrap py-2 text-slate-400">{content}</p>
-      <div className="flex items-center justify-between py-2 last:pb-0">
-        <p className="text-xs text-slate-400">
-          Added by: {currentUser?.user === author ? "You" : author}
-        </p>
+      <div className="flex items-center justify-end py-2 last:pb-0">
         <div className="flex items-center gap-2">
           <Link
             className="rounded-full p-1.5 transition-all hover:bg-blue-200"

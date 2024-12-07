@@ -33,10 +33,6 @@ export interface Task {
   status_id: number;
 }
 
-export type TaskPost = TaskForm & {
-  user_id: number;
-};
-
 export interface ApiResponse {
   success: boolean;
   error?: string;

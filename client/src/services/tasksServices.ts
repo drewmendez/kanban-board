@@ -1,12 +1,16 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiClient } from "./apiClient";
-import { Status, Task, TaskForm, TaskPost } from "../types/types";
+import { Status, Task, TaskForm } from "../types/types";
+import { useAuth } from "../context/AuthContext";
 
 export const useGetAllTask = () => {
+  const { currentUser } = useAuth();
+  const userId = currentUser?.user_id;
+
   return useQuery<Task[]>({
-    queryKey: ["tasks"],
+    queryKey: ["tasks", userId],
     queryFn: async () => {
-      const response = await apiClient.get("/tasks/all");
+      const response = await apiClient.get("/tasks");
       return response.data;
     },
     staleTime: Infinity,
@@ -23,21 +27,11 @@ export const useGetTaskById = (task_id: number) => {
   });
 };
 
-export const useGetTasksByStatusId = (status_id: number) => {
-  return useQuery<Task[]>({
-    queryKey: ["tasks", status_id],
-    queryFn: async () => {
-      const response = await apiClient.get(`/tasks?status=${status_id}`);
-      return response.data;
-    },
-  });
-};
-
 export const useAddTask = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (data: TaskPost) => {
+    mutationFn: async (data: TaskForm) => {
       return await apiClient.post("/tasks", data);
     },
     onSuccess: () => {

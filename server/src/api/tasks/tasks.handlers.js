@@ -1,16 +1,17 @@
 import {
   createTask,
   deleteTask,
-  getAllTasks,
+  getTasks,
   getTask,
-  getTasksByStatus,
   updateTask,
   updateTaskStatusAndReorder,
 } from "./tasks.services.js";
 
-export const handleGetAllTasks = async (req, res) => {
+export const handleGetTasks = async (req, res) => {
   try {
-    const result = await getAllTasks();
+    const user_id = req.user.user_id;
+
+    const result = await getTasks(user_id);
 
     const tasks = result.map((item) => {
       return {
@@ -34,9 +35,11 @@ export const handleGetAllTasks = async (req, res) => {
 
 export const handleGetTask = async (req, res) => {
   try {
+    const user_id = req.user.user_id;
+
     const parsedId = parseInt(req.params.task_id);
 
-    const result = await getTask(parsedId);
+    const result = await getTask(parsedId, user_id);
 
     return res.status(200).json(result);
   } catch (error) {
@@ -47,35 +50,10 @@ export const handleGetTask = async (req, res) => {
   }
 };
 
-export const handleGetTasksByStatus = async (req, res) => {
-  try {
-    const status_id = parseInt(req.query.status_id);
-
-    const result = await getTasksByStatus(status_id);
-
-    const tasks = result.map((item) => {
-      return {
-        task_id: item.task_id,
-        author: `${item.firstname} ${item.lastname}`,
-        title: item.title,
-        content: item.content,
-        status_id: item.status_id,
-      };
-    });
-
-    return res.status(200).json(tasks);
-  } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: "Server error " + error,
-    });
-  }
-};
-
 export const handleCreateTask = async (req, res) => {
-  const { user_id, title, content, status_id } = req.body;
+  const { title, content, status_id } = req.body;
 
-  if (!user_id || !title || !content || !status_id) {
+  if (!title || !content || !status_id) {
     return res.status(400).json({
       success: false,
       message: "All fields are required",
@@ -83,6 +61,8 @@ export const handleCreateTask = async (req, res) => {
   }
 
   try {
+    const user_id = req.user.user_id;
+
     await createTask(user_id, title, content, status_id);
 
     return res.status(201).json({
@@ -128,9 +108,12 @@ export const handleUpdateTaskStatusAndReorder = async (req, res) => {
   const { status_id, order_id, old_status_id } = req.body;
 
   try {
+    const user_id = req.user.user_id;
+
     const parsedId = parseInt(req.params.task_id);
 
     await updateTaskStatusAndReorder(
+      user_id,
       parsedId,
       status_id,
       order_id,
@@ -151,10 +134,12 @@ export const handleUpdateTaskStatusAndReorder = async (req, res) => {
 
 export const handleDeleteTask = async (req, res) => {
   try {
+    const user_id = req.user.user_id;
+
     const parsedId = parseInt(req.params.task_id);
     const status_id = parseInt(req.params.status_id);
 
-    await deleteTask(parsedId, status_id);
+    await deleteTask(user_id, parsedId, status_id);
 
     return res.status(200).json({
       success: true,

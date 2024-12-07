@@ -6,8 +6,6 @@ import { ArrowLeftCircle } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { TaskForm, TaskFormSchema } from "../types/types";
-
-import { useAuth } from "../context/AuthContext";
 import { useAddTask } from "../services/tasksServices";
 
 export default function AddTask() {
@@ -20,16 +18,10 @@ export default function AddTask() {
   });
 
   const navigate = useNavigate();
-  const { currentUser } = useAuth();
   const { mutate: addTask } = useAddTask();
 
   const onSubmit = (data: TaskForm) => {
-    const task = {
-      user_id: currentUser?.user_id!,
-      ...data,
-    };
-
-    addTask(task, { onSuccess: () => navigate("/tasks", { replace: true }) });
+    addTask(data, { onSuccess: () => navigate("/tasks", { replace: true }) });
   };
 
   return (
